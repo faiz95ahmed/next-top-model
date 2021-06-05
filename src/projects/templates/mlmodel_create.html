@@ -1,0 +1,13 @@
+{% extends 'projects_base.html' %}
+
+{% block type1 %}
+<p>Location: <code><a href='/projects/'>Root</a>/{% for instance in form.parent.get_ancestors %}<!--
+--><a href='{{ instance.get_absolute_url }}'>{{ instance.title }}/</a><!--
+-->{% endfor %}<strong><a href='{{ form.parent.get_absolute_url }}'>{{ form.parent.title }}</a></strong>
+</code></p>
+<h1>New ML model (child of {{ form.parent.title }})</h1>
+<form method='POST'> {% csrf_token %}
+{{ form.as_p }}
+<input type='submit' value='Save'/>
+</form>
+{% endblock %}

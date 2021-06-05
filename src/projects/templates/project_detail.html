@@ -1,0 +1,52 @@
+{% extends 'projects_base.html' %}
+{% block extra_header %}
+<style>
+    .button {cursor: pointer;}
+    .button2 {background-color: #4CAF50; color: white;}
+    .button3 {background-color: #f44336; color: white;}
+</style>
+{% endblock %}
+{% block type1 %}
+<p>Location: <code><a href='/projects/'>Root</a>/{% for instance in object.get_ancestors %}<!--
+-->{%if instance != object %}<a href='{{ instance.get_absolute_url }}'>{{ instance.title }}/</a>{% endif %}<!--
+-->{% endfor %}
+</code></p>
+<h1>{{ object.title }}</h1>
+<p>{{ object.description }}</p>
+
+<p>Path on system: <code>{{ object.path_full }}</code></p>
+<p>Admins:
+    {% for user in object.auth_users.all %}
+        {{ user }}, <!--TODO: This will need to be changed when admins and users get differentiated -->
+    {% endfor %}
+</p>
+<p>Users:
+    {% for user in object.auth_users.all %}
+        {{ user }}, 
+    {% endfor %}
+</p>
+<p>
+<button class="button button2" onclick="location.href='{{ object.get_create_url }}';" type="button">Create Subproject</button>
+<button class="button button2" onclick="location.href = '{{ object.get_mlmodel_create_url }}'">Create MLModel</button>
+</p>
+<p>
+<button class="button button3" onclick="location.href = '{{ object.get_delete_url }}'">Delete</button>
+</p>
+{% if subprojects %}
+<h1>Subprojects</h1>
+{% endif %}
+{% for instance in subprojects %}
+    <p>
+        {{ instance.id }} - <strong><a href='{{ instance.get_absolute_url }}'>{{ instance.title }}</a></strong>
+    </p>
+{% endfor %}
+
+{% if mlmodels %}
+<h1>ML Models</h1>
+{% endif %}
+{% for instance in mlmodels %}
+    <p>
+        {{ instance.id }} - <strong><a href='{{ instance.get_absolute_url }}'>{{ instance.title }}</a></strong>
+    </p>
+{% endfor %}
+{% endblock %}

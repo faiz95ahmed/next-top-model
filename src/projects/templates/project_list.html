@@ -1,0 +1,14 @@
+{% extends 'projects_base.html' %}
+
+{% block type1 %}
+<h1>Projects Root</h1>
+{% for instance in object_list %}
+    <p>
+        {{ instance.id }} - <strong><a href='{{ instance.get_absolute_url }}'>{{ instance.title }}</a></strong>
+    </p>
+{% empty %}
+<p>No projects...</p>
+{% endfor %}
+
+<button onclick="location.href = 'create'">Create New Project</button>
+{% endblock %}

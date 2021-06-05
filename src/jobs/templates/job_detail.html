@@ -1,0 +1,25 @@
+{% extends 'jobs_base.html' %}
+{% block extra_header %}
+<style>
+    .button {cursor: pointer;}
+    .button2 {background-color: #4CAF50; color: white;}
+    .button3 {background-color: #f44336; color: white;}
+</style>
+{% endblock %}
+{% block type1 %}
+<p>Location: <code><a href='/projects/'>Root</a>/{% for instance in object.mlmodel.get_ancestors %}<!--
+-->{%if instance != object %}<a href='{{ instance.get_absolute_url }}'>{{ instance.title }}/</a>{% endif %}<!--
+-->{% endfor %}<strong><a href='{{ object.mlmodel.get_absolute_url }}'>{{object.mlmodel.title}}</a></strong>
+</code></p>
+<h1>Priority: {{ object.order }}</h1>
+<p>Admins:
+    {% for user in object.auth_users.all %}
+        {{ user }}, <!--TODO: This will need to be changed when admins and users get differentiated -->
+    {% endfor %}
+</p>
+<p>Users:
+    {% for user in object.auth_users.all %}
+        {{ user }}, 
+    {% endfor %}
+</p>
+{% endblock %}
