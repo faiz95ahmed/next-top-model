@@ -1,0 +1,108 @@
+{% extends 'base_logged_in.html' %}
+{% load static %}
+{% block graph_active %} class="active" {% endblock %}
+{% block extra_header %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.3.2/chart.min.js"></script>
+{% endblock %}
+{% block type1 %}
+<div class="container">
+    {% for row in job_data %}
+    <div class="row align-items-start">
+            <div class="col">
+                <h1 id="app">{{ row.left.model_name }}</h1>
+                <canvas id="myChart-{{ row.left.job_name }}" width="400" height="400"></canvas>
+                <div class="progress">
+                    <div id="progress-bar-{{ row.left.job_name }}" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="d-flex justify-content-center">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" value="" id="showLogTime-{{ row.left.job_name }}">
+                    <label class="form-check-label" for="showLogTime-{{ row.left.job_name }}">
+                        Time
+                    </label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" value="" id="showLogOrder-{{ row.left.job_name }}">
+                    <label class="form-check-label" for="showLogOrder-{{ row.left.job_name }}">
+                        Relative Order
+                    </label>
+                </div>
+                </div>
+                <div id="log-box-{{ row.left.job_name }}" style="white-space:pre-wrap;height:120px;border:1px solid #ccc;overflow:auto;font-family:monospace;font-size:12px;background-color:black;color:white;"></div>
+                <div class="d-flex justify-content-center">
+                    <button class="abortbutton btn btn btn-danger" id="abort-{{ row.left.job_name }}">Abort</button>
+                </div>
+            </div>
+            {% if row.right != None %}
+            <div class="col">
+                <h1 id="app">{{ row.right.model_name }}</h1>
+                <canvas id="myChart-{{ row.right.job_name }}" width="400" height="400"></canvas>
+                <div class="progress">
+                    <div id="progress-bar-{{ row.right.job_name }}" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" value="" id="showLogTime-{{ row.right.job_name }}">
+                    <label class="form-check-label" for="showLogTime-{{ row.right.job_name }}">
+                        Time
+                    </label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" value="" id="showLogOrder-{{ row.right.job_name }}">
+                    <label class="form-check-label" for="showLogOrder-{{ row.right.job_name }}">
+                        Relative Order
+                    </label>
+                </div>
+                <div id="log-box-{{ row.right.job_name }}" style="white-space:pre-wrap;height:120px;border:1px solid #ccc;overflow:auto;font-family:monospace;font-size:12px"></div>
+            </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+<div id="job-names" style="display: none;">{{ job_names }}</div>
+
+<div id="dumped-vals" style="display: none;">{{ dumped_vals }}</div>
+{% endblock %}
+{% block mainscript %}
+<script src="{% static 'main.js' %}"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+<script type="text/javascript">
+    function disableButton(button_name) {
+        var abortButton = document.getElementById(button_name);
+        abortButton.innerHTML = '';
+        abortButton.disabled = true;
+        var newFirstElement = document.createElement('span');
+        newFirstElement.setAttribute("class", "spinner-border spinner-border-sm");
+        newFirstElement.setAttribute("role", "status");
+        newFirstElement.setAttribute("aria-hidden", "true");
+        abortButton.appendChild(newFirstElement);
+        var newstuff = document.createElement(null);
+        newstuff.innerText = "  Waiting for Acknowledgement...";
+        abortButton.appendChild(newstuff);
+    }
+    function clicked(button_name) {
+        if (confirm('Are you sure you want to abort job: ' + button_name + "?")) {
+            $.ajax(
+            {
+                type:"GET",
+                url: "{% url 'graph:abort' %}",
+                data:{
+                    button_name: button_name
+                },
+                success: function( data ) 
+                {
+                    disableButton(button_name)
+                }
+            })
+        } else {
+            return false;
+        }
+    }
+    $('.abortbutton').click(function(){
+        var button_name = $(this).attr("id");
+        clicked(button_name)
+    });
+</script>
+{% endblock %}

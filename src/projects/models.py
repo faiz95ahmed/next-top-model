@@ -61,24 +61,27 @@ class MLModel(models.Model):
 
     def get_absolute_url(self):
         return reverse("projects:mlmodel-detail", kwargs={"id": self.id})
-    
+
     def get_delete_url(self):
         return reverse("projects:mlmodel-delete", kwargs={"id": self.id})
 
-    def get_create_url(self):
-        return reverse("projects:job-create", kwargs={"id": self.id})
-    
+    def get_train_create_url(self):
+        return reverse("projects:job-train-create", kwargs={"id": self.id})
+
+    def get_test_create_url(self):
+        return reverse("projects:job-test-create", kwargs={"id": self.id})
+
     @property
     def get_fq_path(self):
         if self.parent is None:
             return [self.path, self.title]
         else:
             return self.parent.get_fq_path + [self.title]
-    
+
     @property
     def get_ancestors(self):
         return self.parent.get_ancestors_and_self()
-       
+
     @property
     def path_full(self):
         return "/".join(self.get_fq_path).replace(" ", "_")

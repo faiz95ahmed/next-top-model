@@ -1,4 +1,4 @@
-"""next_top_model URL Configuration
+"""projects URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/3.1/topics/http/urls/
@@ -13,16 +13,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import include, path, reverse
+from django.urls import path, include
+from .views import index, abort
+# from .views import JobDeleteView, JobListView, JobDetailView
 
-from pages.views import home_view
-
+app_name = 'graph'
 urlpatterns = [
-    path('', home_view, name='home'),
-    path('admin/', admin.site.urls),
-    path('projects/', include('projects.urls')),
-    path('jobs/', include('jobs.urls')),
-    path('graph/', include('graph.urls')),
-    path('accounts/', include('django.contrib.auth.urls'))
+    path ('', index, name='index'),
+    path ('abort', abort, name='abort')
 ]

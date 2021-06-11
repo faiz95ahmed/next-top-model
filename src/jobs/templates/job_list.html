@@ -4,7 +4,7 @@
 <h1>Jobs</h1>
 {% for instance in object_list %}
     <p>
-        {{ instance.id }} - <strong><a href='{{ instance.get_absolute_url }}'>{{ instance.mlmodel.title }}</a></strong>
+        {{ instance.order }} - <strong><a href='{{ instance.get_absolute_url }}'>{{ instance.mlmodel.title }}</a></strong>
     </p>
 {% empty %}
 <p>No jobs...</p>

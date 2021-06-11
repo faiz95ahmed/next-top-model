@@ -31,9 +31,12 @@
 <p><a href='{{ object.job.get_absolute_url }}'>Job</a></p>
 {% else %}
 <p>
-<button class="button button2" onclick="location.href='{{ object.get_create_url }}';" type="button">Create Job</button>
+<button class="button button2" onclick="location.href='{{ object.get_train_create_url }}';" type="button">Create Job</button>
 </p>
 {% endif %}
+<p>
+<button class="button button2" onclick="location.href='{{ object.get_test_create_url }}';" type="button">Schedule Test</button>
+</p>
 <p>
 <button class="button button3" onclick="location.href = '{{ object.get_delete_url }}'">Delete</button>
 </p>

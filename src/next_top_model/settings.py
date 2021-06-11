@@ -9,8 +9,15 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
 from pathlib import Path
+import json
+
+with open('config.json', 'r') as f:
+    config_dict = json.load(f)
+
+REDIS_PORT = config_dict['redis_port']
+ABORT_PORT = config_dict['abort_port']
+GPUS = config_dict['gpus']
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +27,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'l$gv_kq_4l$vf$@f1i@8s7$_e%yw-ktp*k=l5y2y78&2hd=q)p'
+with open(config_dict['django_key_path'], 'r') as f:
+    SECRET_KEY = f.read().strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,10 +45,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
 
-    'projects',
     'pages',
+    'projects',
     'jobs',
+    'graph',
 ]
 
 MIDDLEWARE = [
@@ -58,7 +68,10 @@ ROOT_URLCONF = 'next_top_model.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [Path.joinpath(BASE_DIR, 'templates'), Path.joinpath(BASE_DIR, 'projects', 'templates')],
+        'DIRS': [Path.joinpath(BASE_DIR, 'templates'),
+                 Path.joinpath(BASE_DIR, 'projects', 'templates'),
+                 Path.joinpath(BASE_DIR, 'jobs', 'templates'),
+                 Path.joinpath(BASE_DIR, 'graph', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -72,7 +85,9 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'next_top_model.wsgi.application'
+ASGI_APPLICATION = 'next_top_model.asgi.application'
 
+CELERY_BROKER_URL = 'redis://localhost:{}'.format(REDIS_PORT) 
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
@@ -84,6 +99,14 @@ DATABASES = {
     }
 }
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', int(REDIS_PORT))]
+        }
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -122,3 +145,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [Path.joinpath(BASE_DIR, 'static')]

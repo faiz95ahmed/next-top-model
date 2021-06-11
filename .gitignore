@@ -127,3 +127,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Celery
+src/celerybeat-schedule*
+
+# Django
+migrations/
+
+# vscode
+.vscode

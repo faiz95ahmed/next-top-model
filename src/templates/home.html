@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base_logged_in.html' %}
 {% block type1 %}
 {{request.user.is_authenticated}}
 <p>Hello World!</p>

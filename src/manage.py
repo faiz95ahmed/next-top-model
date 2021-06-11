@@ -15,8 +15,13 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
-    execute_from_command_line(sys.argv)
 
+    # TODO: manage auxiliary processes
+        # check that the redis-server service is running, get the port number
+        # start the celery beat
+        # start the two celery workers (1 worker for default and n workers for jobs (n = num GPUs))
+    execute_from_command_line(sys.argv)
+        # kill celery workers?
 
 if __name__ == '__main__':
     main()

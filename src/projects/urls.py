@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.urls import path
 from .views import MLModelCreateView, MLModelDeleteView, MLModelDetailView, ProjectListView, ProjectCreateViewRoot, ProjectCreateViewChild, ProjectDetailView, ProjectUpdateView, ProjectDeleteView
-from jobs.views import JobCreateView
+from jobs.views import JobTrainCreateView, JobTestCreateView
 
 app_name = 'projects'
 urlpatterns = [
@@ -23,7 +23,8 @@ urlpatterns = [
     path ('create', ProjectCreateViewRoot.as_view(), name='project-create-root'),
     path ('<int:id>/', ProjectDetailView.as_view(), name='project-detail'),
     path ('mlmodel/<int:id>/', MLModelDetailView.as_view(), name='mlmodel-detail'),
-    path ('mlmodel/<int:id>/create', JobCreateView.as_view(), name='job-create'),
+    path ('mlmodel/<int:id>/create', JobTrainCreateView.as_view(), name='job-train-create'),
+    path ('mlmodel/<int:id>/create-test', JobTestCreateView.as_view(), name='job-test-create'),
     path ('<int:id>/create', ProjectCreateViewChild.as_view(), name='project-create-child'),
     path ('<int:id>/create-mlmodel', MLModelCreateView.as_view(), name='project-create-mlmodel'),
     # path ('<int:id>/update/', ProjectUpdateView.as_view(), name='project-update'),
