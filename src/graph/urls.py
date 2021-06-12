@@ -1,4 +1,4 @@
-"""projects URL Configuration
+"""graph URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/3.1/topics/http/urls/
@@ -13,12 +13,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path, include
+from django.urls import path
 from .views import index, abort
 # from .views import JobDeleteView, JobListView, JobDetailView
 
 app_name = 'graph'
 urlpatterns = [
-    path ('', index, name='index'),
-    path ('abort', abort, name='abort')
+    path ('', index, name='graph-index'),
+    path ('abort', abort, name='graph-abort')
 ]

@@ -103,7 +103,7 @@ class ProjectCreateViewChild(SubprojectMixin, ProjectCreateView):
     def get_form(self, *args, **kwargs):
         # print("************" + str(self.request.path.split("/")[-2]))
         parent_id = self.request.path.split("/")[-2]
-        print(parent_id)
+        # print(parent_id)
         self.parent = Project.objects.get(id=parent_id)
         form = super().get_form(*args, **kwargs)
         form.parent = self.parent
@@ -126,8 +126,8 @@ class MLModelDetailView(LoginRequiredMixin, DetailView):
     def get_object(self):
         id_ = self.kwargs.get("id")
         obj = get_object_or_404(MLModel, id=id_)
-        print(obj)
-        print(obj.get_ancestors)
+        # print(obj)
+        # print(obj.get_ancestors)
         return obj
 
 class MLModelDeleteView(LoginRequiredMixin, DeleteView):
@@ -137,7 +137,7 @@ class MLModelDeleteView(LoginRequiredMixin, DeleteView):
         id_ = self.kwargs.get("id")
         # need to also check if user is correct type
         obj = get_object_or_404(MLModel, id=id_)
-        print(obj)
+        # print(obj)
         self.parent = self.obj.parent
         return obj
 
@@ -157,7 +157,7 @@ class MLModelCreateView(LoginRequiredMixin, CreateView):
 
     def get_form(self, *args, **kwargs):
         parent_id = self.request.path.split("/")[-2]
-        print(parent_id)
+        # (parent_id)
         self.parent = Project.objects.get(id=parent_id)
         form = super().get_form(*args, **kwargs)
         form.parent = self.parent

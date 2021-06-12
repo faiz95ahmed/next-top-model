@@ -1,4 +1,3 @@
-
 var elemMap = new Map() // stores chart context, dataset, progress_bar, original_data, and log box
 
 var socket = new WebSocket('ws://localhost:8000/ws/graph/');

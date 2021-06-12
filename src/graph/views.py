@@ -18,7 +18,7 @@ def index(request):
             results_file = Path(curr_job.mlmodel.path_full, "results.jsonl")
             with open(results_file, "r") as f:
                 lines = [json.loads(l.strip()) for l in f.readlines()]
-                for line in lines: print(type(line), line)
+                # for line in lines: print(type(line), line)
                 results_str = json.dumps(lines).replace(" ", "")
                 # print(results_str)
         except FileNotFoundError:

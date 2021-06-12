@@ -3,7 +3,7 @@ from celery import Celery, shared_task
 from celery.utils.log import get_task_logger
 from kombu import Queue
 from django.apps import apps
-from .settings import REDIS_PORT, ABORT_PORT, GPUS
+from .settings import REDIS_PORT, GPUS
 import redis
 import shlex
 import subprocess
@@ -57,7 +57,7 @@ def do_job(job_id: int):
     # get job data
     gpu_id = curr_job.gpu
     # clean job data
-    command = curr_job.get_command(str(REDIS_PORT), str(ABORT_PORT + gpu_id))
+    command = curr_job.get_command(str(REDIS_PORT))
     logger2.log(logging.INFO, command)
     # enact command (blocking)
     _ = subprocess.run(shlex.split(command))

@@ -37,7 +37,7 @@ class Project(models.Model):
     @property
     def get_ancestors(self):
         a = self.get_ancestors_and_self()[:-1]
-        print(a)
+        # print(a)
         return a
     
     def get_ancestors_and_self(self):

@@ -3,6 +3,8 @@
 {% block graph_active %} class="active" {% endblock %}
 {% block extra_header %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.3.2/chart.min.js"></script>
+<script src="{% static 'main.js' %}"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
 {% endblock %}
 {% block type1 %}
 <div class="container">
@@ -66,8 +68,7 @@
 <div id="dumped-vals" style="display: none;">{{ dumped_vals }}</div>
 {% endblock %}
 {% block mainscript %}
-<script src="{% static 'main.js' %}"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+
 <script type="text/javascript">
     function disableButton(button_name) {
         var abortButton = document.getElementById(button_name);
@@ -87,7 +88,7 @@
             $.ajax(
             {
                 type:"GET",
-                url: "{% url 'graph:abort' %}",
+                url: "{% url 'graph:graph-abort' %}",
                 data:{
                     button_name: button_name
                 },

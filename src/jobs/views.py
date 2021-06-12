@@ -30,7 +30,7 @@ class JobDeleteView(LoginRequiredMixin, DeleteView):
         id_ = self.kwargs.get("id")
         # need to also check if user is correct type
         obj = get_object_or_404(Job, id=id_)
-        print(obj)
+        # print(obj)
         self.parent = self.obj.parent
         return obj
 
@@ -52,7 +52,7 @@ class JobCreateView(LoginRequiredMixin, CreateView):
             max_ord = 0
         else:
             max_ord = maximum_order_val['order__max'] + 1000
-        print(max_ord)
+        # print(max_ord)
         candidate.order = max_ord
         candidate.job_type = job_type
         candidate.save()
@@ -62,7 +62,7 @@ class JobCreateView(LoginRequiredMixin, CreateView):
 
     def get_form(self, *args, **kwargs):
         parent_id = self.request.path.split("/")[-2]
-        print(parent_id)
+        # print(parent_id)
         self.parent = get_object_or_404(MLModel, id=parent_id)
         form = super().get_form(*args, **kwargs)
         form.parent = self.parent

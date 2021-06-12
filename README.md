@@ -20,16 +20,20 @@ celery -A next_top_model worker -n jobs_worker -c NUM_WORKERS -Q jobs -l INFO
     * Also useful in optimising training scripts to be more GPU bound (and less bottlenecked by other things)
 * Job Scheduling
 * Auto Stopping and restarting around schedules
-* Compartmentalise Projects and MLModels better
 * Benchmarks, Visualisations, Tables:
     * Export table as LaTeX?
     * Auto generate Table and Figure captions?
     * Export as LaTeX float?
 
 Not really relevant to my project, but could be useful to pick up after I submit my project:
+* Compartmentalise Projects and MLModels better
 * Showing past logs on the web interface
 * Security Concerns
 * Better Authentication of Projects, Jobs etc.
 * Cosmetic Changes
 * Fixing Links
 * Testing Suite
+
+## Painful Errors:
+
+https://stackoverflow.com/questions/66960899/django-channels-error-when-attempting-to-serve-static-files-with-devserver
