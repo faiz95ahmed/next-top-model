@@ -5,7 +5,8 @@
 --><a href='{{ instance.get_absolute_url }}'>{{ instance.title }}/</a><!--
 -->{% endfor %}<strong><a href='{{ form.parent.get_absolute_url }}'>{{ form.parent.title }}/</a></strong>
 </code></p>
-<h1>Subproject of {{ form.parent.title }}</h1>
+{% block heading %}
+{% endblock %}
 <form method='POST'> {% csrf_token %}
 {{ form.as_p }}
 <input type='submit' value='Save'/>

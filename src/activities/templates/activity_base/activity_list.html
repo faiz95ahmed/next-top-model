@@ -1,0 +1,15 @@
+{% extends 'activity_base/activity_base.html' %}
+
+{% block type1 %}
+{% block activity_name_title %}
+{% endblock %}
+{% for instance in object_list %}
+    <p>
+        {{ instance.id }} - <strong><a href='{{ instance.get_absolute_url }}'>{{ instance.title }}</a></strong>
+    </p>
+{% empty %}
+{% block no_activities %}
+{% endblock %}
+{% endfor %}
+<p><button onclick="location.href = '{% block activity_name_prefix %}{% endblock %}/create'">Create New {% block activity_name %}{% endblock %}</button></p>
+{% endblock %}

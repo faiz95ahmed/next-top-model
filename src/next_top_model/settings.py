@@ -10,14 +10,17 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 from pathlib import Path
-import django
 import json
+import redis
+from .util import check_redis
 
 with open('config.json', 'r') as f:
     config_dict = json.load(f)
 
-REDIS_PORT = config_dict['redis_port']
+REDIS_PORT = check_redis()
+_redis = redis.Redis(host = 'localhost', port = REDIS_PORT, db = 0)
 GPUS = config_dict['gpus']
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -48,6 +51,7 @@ INSTALLED_APPS = [
 
     'pages',
     'projects',
+    'activities',
     'jobs',
     'graph',
 ]
@@ -147,5 +151,3 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [Path.joinpath(BASE_DIR, 'static')]
-print(STATICFILES_DIRS)
-print()

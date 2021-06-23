@@ -1,5 +1,4 @@
 {
     "django_key_path": "/home/faiz/Desktop/djangokey",
-    "redis_port": 6379,
     "gpus": [0]
 }

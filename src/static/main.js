@@ -4,9 +4,10 @@ var socket = new WebSocket('ws://localhost:8000/ws/graph/');
 
 socket.onmessage = function(e){
     var eventData = JSON.parse(e.data);
-    var job_name = eventData.job_name;
-    var job_data = elemMap.get(job_name);
+    var job_id = eventData.job_id;
+    var job_data = elemMap.get(job_id);
     var djangoData = JSON.parse(eventData.text);
+    // change button to reflect the abort acknowledged
     if (djangoData.abort_ack) {
         job_data.abortButton.setAttribute("class", "abortbutton btn btn-success");
         job_data.abortButton.innerHTML = "  Abort Acknowledged!";

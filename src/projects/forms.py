@@ -17,4 +17,4 @@ class MLModelCreateForm(forms.ModelForm):
     parent_name = None
     class Meta:
         model = MLModel
-        fields = ['title', 'description', 'model_name', 'preproc_name', 'data_path']
+        fields = ['title', 'description', 'model_args']

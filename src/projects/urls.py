@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
-from .views import MLModelCreateView, MLModelDeleteView, MLModelDetailView, ProjectListView, ProjectCreateViewRoot, ProjectCreateViewChild, ProjectDetailView, ProjectUpdateView, ProjectDeleteView
+from .views import MLModelCreateView, MLModelDeleteView, MLModelDetailView, ProjectListView, ProjectCreateViewRoot, ProjectCreateViewChild, ProjectDetailView, ProjectDeleteView
 from jobs.views import JobTrainCreateView, JobTestCreateView
 
 app_name = 'projects'
@@ -27,7 +27,6 @@ urlpatterns = [
     path ('mlmodel/<int:id>/create-test', JobTestCreateView.as_view(), name='job-test-create'),
     path ('<int:id>/create', ProjectCreateViewChild.as_view(), name='project-create-child'),
     path ('<int:id>/create-mlmodel', MLModelCreateView.as_view(), name='project-create-mlmodel'),
-    # path ('<int:id>/update/', ProjectUpdateView.as_view(), name='project-update'),
     path ('<int:id>/delete/', ProjectDeleteView.as_view(), name='project-delete'),
     path ('mlmodel/<int:id>/delete/', MLModelDeleteView.as_view(), name='mlmodel-delete'),
 ]

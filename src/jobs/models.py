@@ -1,55 +1,94 @@
+import json
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.deletion import CASCADE
+from django.urls import base
 from django.urls.base import reverse
-# from projects.models import MLModel
+
+from next_top_model.settings import REDIS_PORT # possibility of a circular import here
+from django.core.exceptions import ValidationError
+from pathlib import Path
+from .util import JobStatus
+
+INTEGER_FIELD_MAX = (2**31) - 1 # TODO: is there something like IntegerField.MaxValue that I could use instead?
+
+def to_str_safe(d):
+    b = json.dumps(d).encode('utf8')
+    ls = []
+    for c in b:
+        if c == 39:
+            ls = ls + [92, 117, 48, 48, 50, 55]
+        else:
+            ls.append(c)
+    return "--json_args" + bytes(ls).decode()
 
 # Create your models here.
 class Job(models.Model):
     mlmodel     = models.ForeignKey('projects.MLModel', on_delete=CASCADE, null=False, blank=False)
-    script_loc  = models.TextField(default="")
-    script_name = models.TextField(default="")
-    test_data   = models.TextField(null=True, blank=True)
     auth_users  = models.ManyToManyField(User, blank=False) # need to add permissions - read (list/detail & create jobs), create (to create subprojects or mlmodels), update&delete (to update&delete)
-    order       = models.IntegerField(default=0)
-    from_dict   = models.TextField(null=False, default='', blank=True)
-    active      = models.BooleanField(default=False)
-    complete    = models.BooleanField(default=False)
-    job_type    = models.CharField(max_length=10, default='TRAIN')
-    conda_environment = models.TextField(null=True)
+    order       = models.IntegerField(default=INTEGER_FIELD_MAX)
+    from_dict   = models.FilePathField(null=True, path=Path.home(), recursive=True, match='checkpoint_(\d)+\.pt',blank=True)
+    protocol    = models.ForeignKey('activities.Protocol', on_delete=CASCADE, null=True, blank=True)
+    benchmark   = models.ForeignKey('activities.Benchmark', on_delete=CASCADE, null=True, blank=True)
+    status      = models.CharField(max_length=8, default=JobStatus.PENDING, choices=JobStatus.choices)
     gpu         = models.IntegerField(null=True)
 
+    # status == RUNNING or ENDING -> there is no other job with status == RUNNING or ENDING with the same gpu
+    # TODO: how to model this as a constraint?
+    
     def get_absolute_url(self):
         return reverse("jobs:job-detail", kwargs={"id": self.id})
 
     def get_delete_url(self):
         return reverse("jobs:job-delete", kwargs={"id": self.id})
 
-    def get_command(self, REDIS_PORT: str="REDIS_PORT", ABORT_PORT: str="ABORT_PORT"):
+    @property
+    def job_type(self):
+        if self.protocol is None:
+            return "TEST"
+        else:
+            return "TRAIN"
+
+    def get_command(self):
         job_name = "job_{}".format(str(self.id))
-        script_loc = self.script_loc
-        if len(script_loc) > 0 and script_loc[-1] != "/":
-            script_loc = script_loc + "/"
-        script_name = self.script_name.replace(" ", "")
-        if len(script_name) > 2 and script_name[-3:] != ".py":
-            script_name = script_name + ".py"
-        script_path = script_loc + script_name
-        job_type = self.job_type
+        is_train = self.protocol is not None
+        activity = self.protocol if is_train else self.benchmark
+        job_type = 'TRAIN' if is_train else 'TEST'
+        script_path = activity.script_path
+        conda_env = activity.conda_environment
+        activity_args = (activity.additional_args).copy() if activity.additional_args is not None else {}
+        model_args = self.mlmodel.model_args
+        # using the code below, model args take precedence over activity args
+        for k, v in model_args.items():
+            activity_args[k] = v
+        
         # form command
-        command = "conda run -n {} python3 {} --model {} --hyperparams {} --preproc {}".format(self.conda_environment,
-                                                                                               script_path,
-                                                                                               self.mlmodel.title,
-                                                                                               self.mlmodel.path_full + "/hyperparameters.json",
-                                                                                               self.mlmodel.preproc_name)
-        if self.job_type == "TRAIN":
-            train_options = " --save_dir {} --data {} ".format(self.mlmodel.path_full, self.mlmodel.data_path)
-            if self.from_dict is not None:
-                checkpoint = " --checkpoint " + self.from_dict
-            else:
-                checkpoint = ""
-            command = command + train_options + checkpoint
-        elif job_type == "TEST":
-            test_options = " --test_data {}".format(self.test_data)
-            command = command + test_options
-        command = command + " --redis_port {} --abort_port {} --job_name {}".format(REDIS_PORT, ABORT_PORT, job_name)
+        base_command = "conda run -n {} python3 {}".format(conda_env, script_path)
+        interface_args = "--job_name {} --save_dir {} --redis_port {}".format(job_name,
+                                                                              self.mlmodel.path_full,
+                                                                              REDIS_PORT)
+        additional_args = "--job_type {} --gpu {} {}".format(job_type, self.gpu, to_str_safe(activity_args))                                  
+        command = " ".join([base_command, interface_args, additional_args])
         return command
+
+    def clean(self):
+        # ensure precisely one of protocol or benchmark is defined
+        if (self.protocol is None) == (self.benchmark is None):
+            raise ValidationError("Only one of Protocol and Benchmark can be defined!")
+        # if benchmark is defined ensure that from_dict is defined
+        # if (self.benchmark is not None) and (self.from_dict is None):
+        #     raise ValidationError("Need a saved model for benchmarking!")
+
+class Log(models.Model):
+    job             = models.ForeignKey(Job, on_delete=CASCADE)
+    message         = models.JSONField()
+    relativeCreated = models.FloatField()
+    log_level       = models.IntegerField() # increments of 10: (0: not set; debug; info; warning; error; 50: critical)
+    time            = models.DateTimeField()
+
+class Result(models.Model):
+    job     = models.ForeignKey(Job, on_delete=CASCADE)
+    epoch   = models.IntegerField(null=True) 
+    content = models.JSONField(blank=True, default=dict)
+    class Meta:
+        unique_together = ('job', 'epoch')

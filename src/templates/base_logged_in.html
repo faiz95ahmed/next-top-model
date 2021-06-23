@@ -3,6 +3,8 @@
 <nav>
     <div class="topnav">
         <a {% block projects_active %} {% endblock %} href="/projects">Projects</a>
+        <a {% block protocols_active %} {% endblock %} href="/activities/protocol">Training Protocols</a>
+        <a {% block benchmarks_active %} {% endblock %} href="/activities/benchmark">Benchmarks</a>
         <a {% block jobs_active %} {% endblock %} href="/jobs">Jobs</a>
         <a {% block graph_active %} {% endblock %} href="/graph">Live Page</a>
         <a href="/accounts/logout">Logout</a>

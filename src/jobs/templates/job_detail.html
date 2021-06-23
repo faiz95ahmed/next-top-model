@@ -8,19 +8,14 @@
 {% endblock %}
 {% block type1 %}
 <p>Location: <code><a href='/projects/'>Root</a>/{% for instance in object.mlmodel.get_ancestors %}<!--
--->{%if instance != object %}<a href='{{ instance.get_absolute_url }}'>{{ instance.title }}/</a>{% endif %}<!--
+-->{% if instance != object %}<a href='{{ instance.get_absolute_url }}'>{{ instance.title }}/</a>{% endif %}<!--
 -->{% endfor %}<strong><a href='{{ object.mlmodel.get_absolute_url }}'>{{ object.mlmodel.title }}</a></strong>
 </code></p>
 <h1>Priority: {{ object.order }}</h1>
 <h2>Job Type: {{ object.job_type }}</h2>
-<p>Active: {{ object.active }}</p>
-<p>Complete: {{ object.complete }}</p>
+<p>Status: {{ object.status }}</p>
 <p>GPU: {{ object.gpu }}</p>
-<p>Conda Env: {{ object.conda_environment }}</p>
 <p>Job Type: {{ object.job_type }}</p>
-{% if object.job_type == "TEST" %}
-<p>Test Data: {{ object.test_data }}</p>
-{% endif %}
 <p>Command: <code>{{ object.get_command }}</code></p>
 <p>Admins:
     {% for user in object.auth_users.all %}

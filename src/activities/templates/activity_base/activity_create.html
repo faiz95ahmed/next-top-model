@@ -1,0 +1,10 @@
+{% extends 'activity_base/activity_base.html' %}
+
+{% block type1 %}
+{% block activity_name_title %}
+{% endblock %}
+<form method='POST'> {% csrf_token %}
+{{ form.as_p }}
+<input type='submit' value='Save'/>
+</form>
+{% endblock %}

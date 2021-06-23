@@ -1,0 +1,25 @@
+{% extends 'activity_base/activity_base.html' %}
+
+{% block type1 %}
+<div class="container">
+        <div class="col">
+            <div class="row">
+                <h1>{{ object.title }}</h1>
+                <p>Title: {{ object.title }}</p>
+                <p>Description: {{ object.description }}</p>
+                <p>Script path: <code>{{ object.script_path }}</code></p>
+                <p>Conda Env: {{ object.conda_environment }}</p>
+                <p>Job Type: {{ object.job_type }}</p>
+                <p>Additional Arguments: <code>{{ object.additional_args | pprint }}</code></p>
+            </div>
+            <div class="row">
+                {% block col0row1 %}
+                {% endblock %}
+            </div>
+        </div>
+        <div class="col">
+            {% block col1 %}
+            {% endblock %}
+        </div>
+</div>
+{% endblock %}

@@ -3,21 +3,14 @@ Model Training (and Scheduling), Benchmarking, Visualisation
 
 pip install using requirements.txt
 
-cd to src directory and run the following commands in seperate terminals:
+cd to src directory and run the following command:
 
 ```
 python3 manage.py runserver
-celery -A next_top_model beat -l INFO
-celery -A next_top_model worker -n default_worker -Q default -l INFO
-celery -A next_top_model worker -n jobs_worker -c NUM_WORKERS -Q jobs -l INFO
 ```
 
 ## TODO:
-* start celery beat & workers with server
 * GPU usage monitoring
-* 1 worker per GPU:
-    * to measure GPU usage of training instances for better resource/power usage reporting in papers etc.
-    * Also useful in optimising training scripts to be more GPU bound (and less bottlenecked by other things)
 * Job Scheduling
 * Auto Stopping and restarting around schedules
 * Benchmarks, Visualisations, Tables:
@@ -32,8 +25,16 @@ Not really relevant to my project, but could be useful to pick up after I submit
 * Better Authentication of Projects, Jobs etc.
 * Cosmetic Changes
 * Fixing Links
-* Testing Suite
+* Tests!
 
 ## Painful Errors:
 
 https://stackoverflow.com/questions/66960899/django-channels-error-when-attempting-to-serve-static-files-with-devserver
+
+## Nice trick
+
+To avoid having to actually setup the webserver in a production setting, serve it via an SSH socket. Do the following:
+
+```ssh -L xyz:127.0.0.1:8000 user@server -N -i identity_file```
+
+and navigate to 127.0.0.1:xyz on your local machine to access the interface.

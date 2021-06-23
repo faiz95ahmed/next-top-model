@@ -28,7 +28,7 @@ class ProjectListView(AuthMixin, ListView):
 
 class ProjectDetailView(AuthMixin, DetailView):
     template_name = 'project_detail.html'
-        
+
     def children(self):
         id_ = self.kwargs.get("id")
         obj = Project.objects.get(id=id_)
@@ -55,7 +55,7 @@ class ProjectDeleteView(AdminMixin, DeleteView):
         id_ = self.kwargs.get("id")
         # need to also check if user is correct type
         obj = get_object_or_404(Project, id=id_)
-        self.parent = self.obj.parent
+        self.parent = obj.parent
         return obj
 
     def get_success_url(self):
@@ -70,9 +70,7 @@ class SubprojectMixin():
 class RootProjectMixin():
     form_class = ProjectCreateFormRoot
 
-class ModifMixin():
-    template_name = 'project_create.html'
-    
+class ModifMixin():  
     def form_valid(self, form):
         candidate = form.save(commit=False)
         candidate.save()
@@ -81,6 +79,7 @@ class ModifMixin():
         return super().form_valid(form)
 
 class ProjectCreateView(ModifMixin, AuthMixin, CreateView):   
+    template_name = 'project_create_root.html'
     def form_valid(self, form):
         candidate = form.save(commit=False)
         while candidate.path[-1] == "/":
@@ -92,6 +91,7 @@ class ProjectCreateView(ModifMixin, AuthMixin, CreateView):
         return CreateView.form_valid(self, form)
 
 class ProjectCreateViewChild(SubprojectMixin, ProjectCreateView):
+    template_name = 'project_create_child.html'
     def form_valid(self, form):
         candidate = form.save(commit=False)
         candidate.parent = self.parent        
@@ -117,8 +117,8 @@ class ProjectCreateViewRoot(RootProjectMixin, ProjectCreateView):
         form = super().get_form(*args, **kwargs)
         return form
 
-class ProjectUpdateView(ModifMixin, AdminMixin, UpdateView):
-    pass
+# class ProjectUpdateView(ModifMixin, AdminMixin, UpdateView):
+#     pass
 
 class MLModelDetailView(LoginRequiredMixin, DetailView):
     template_name = 'mlmodel_detail.html'

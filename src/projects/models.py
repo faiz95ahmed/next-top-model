@@ -7,7 +7,7 @@ from jobs.models import Job
 class Project(models.Model):
     title       = models.CharField(max_length=30, blank=False, null=False, unique=True)
     description = models.TextField()
-    path        = models.TextField(blank=False, null=True)
+    path        = models.TextField(blank=True, null=True)
     auth_users  = models.ManyToManyField(User, blank=False) # need to add permissions - read (list/detail & create jobs), create (to create subprojects or mlmodels), update&delete (to update&delete)
     parent      = models.ForeignKey('self', on_delete=CASCADE, null=True, blank=True)
 
@@ -24,8 +24,10 @@ class Project(models.Model):
     def get_mlmodel_create_url(self):
         return reverse("projects:project-create-mlmodel", kwargs={"id": self.id})
 
-    # def get_update_url(self):
-    #     return reverse("projects:project-update", kwargs={"id": self.id})
+    def save(self, *args, **kwargs):
+        if self.path == "":
+            self.path = None
+        super().save(*args, **kwargs)
 
     @property
     def get_fq_path(self):
@@ -55,9 +57,7 @@ class MLModel(models.Model):
     description  = models.TextField()
     auth_users   = models.ManyToManyField(User, blank=False) # need to add permissions - read (list/detail & create jobs), create (to create subprojects or mlmodels), update&delete (to update&delete)
     parent       = models.ForeignKey(Project, on_delete=CASCADE, null=False, blank=False)
-    model_name   = models.TextField(null=False, blank=False)
-    preproc_name = models.TextField(null=False, blank=False)
-    data_path    = models.TextField(null=False, blank=False)
+    model_args   = models.JSONField(blank=True, verbose_name="Model Specific Arguments (e.g. Hyperparameters)")
 
     def get_absolute_url(self):
         return reverse("projects:mlmodel-detail", kwargs={"id": self.id})
