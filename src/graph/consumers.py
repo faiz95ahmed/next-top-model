@@ -83,55 +83,55 @@ class GraphConsumer(AsyncWebsocketConsumer):
             print('ack_abort_recieved ', e)
             raise e
  
-    async def websocket_connect(self, message):
-        try:
-            return await super().websocket_connect(message)
-        except Exception as e:
-            print('websocket_connect ', e)
-            raise e
+    # async def websocket_connect(self, message):
+    #     try:
+    #         return await super().websocket_connect(message)
+    #     except Exception as e:
+    #         print('websocket_connect ', e)
+    #         raise e
     
-    async def websocket_receive(self, message):
-        try:
-            return await super().websocket_receive(message)
-        except Exception as e:
-            print('websocket_receive ', e)
-            raise e
+    # async def websocket_receive(self, message):
+    #     try:
+    #         return await super().websocket_receive(message)
+    #     except Exception as e:
+    #         print('websocket_receive ', e)
+    #         raise e
     
-    async def websocket_disconnect(self, message):
-        try:
-            return await super().websocket_disconnect(message)
-        except Exception as e:
-            print('websocket_disconnect ', e)
-            raise e
+    # async def websocket_disconnect(self, message):
+    #     try:
+    #         return await super().websocket_disconnect(message)
+    #     except Exception as e:
+    #         print('websocket_disconnect ', e)
+    #         raise e
     
-    async def __call__(self, *args, **kwargs):
-        try:
-            return await super().__call__(*args, **kwargs)
-        except Exception as e:
-            print('__call__ ', e)
-            traceback.print_exc()
-            raise e
+    # async def __call__(self, *args, **kwargs):
+    #     try:
+    #         return await super().__call__(*args, **kwargs)
+    #     except Exception as e:
+    #         print('__call__ ', e)
+    #         traceback.print_exc()
+    #         raise e
 
-    async def dispatch(self, message):
-        try:
-            return await super().dispatch(message)
-        except Exception as e:
-            print('dispatch ', e)
-            raise e
+    # async def dispatch(self, message):
+    #     try:
+    #         return await super().dispatch(message)
+    #     except Exception as e:
+    #         print('dispatch ', e)
+    #         raise e
 
-    async def send(self, message):
-        try:
-            return await super().send(message)
-        except Exception as e:
-            print('send ', e)
-            raise e
+    # async def send(self, message):
+    #     try:
+    #         return await super().send(message)
+    #     except Exception as e:
+    #         print('send ', e)
+    #         raise e
 
-    async def close(self, *args, **kwargs):
-        try:
-            return await super().close(*args, **kwargs)
-        except Exception as e:
-            print('close ', e)
-            raise e
+    # async def close(self, *args, **kwargs):
+    #     try:
+    #         return await super().close(*args, **kwargs)
+    #     except Exception as e:
+    #         print('close ', e)
+    #         raise e
 
     async def send_initial_data(self):
         try:
