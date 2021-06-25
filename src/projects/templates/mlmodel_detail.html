@@ -8,14 +8,11 @@
 {% endblock %}
 {% block type1 %}
 <p>Location: <code><a href='/projects/'>Root</a>/{% for instance in object.get_ancestors %}<!--
---><a href='{{ instance.get_absolute_url }}'>{{ instance.title }}/</a><!--
+--><a href='/{{ instance.get_absolute_url }}'>{{ instance.title }}/</a><!--
 -->{% endfor %}
 </code></p>
 <h1>{{ object.title }}</h1>
 <p>{{ object.description }}</p>
-<p>Model name: <code>{{ object.model_name }}</code></p>
-<p>Preprocessor name: <code>{{ object.preproc_name }}</code></p>
-<p>Data path: <code>{{ object.data_path }}</code></p>
 <p>Path on system: <code>{{ object.path_full }} </code></p>
 <p>Admins:
     {% for user in object.auth_users.all %}

@@ -1,20 +1,16 @@
 {% extends 'activity_base/activity_detail.html' %}
+{% load static %}
 {% block benchmarks_active %} class="active" {% endblock %}
-
-{% block extra_header %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.3.2/chart.min.js"></script>
-<script src="{% static 'benchmark_graph.js' %}"></script>
-{% endblock %}
 
 {% block col0row1 %}
 Jobs with benchmark, select specific jobs to add to comparison table on right column
 {% for job in jobs_with_benchmark %}
     <div class="form-check">
         <input class="form-check-input bench-select" type="checkbox" value="" id="job-{{ job.id }}">
-        <label class="form-check-label" for="job-{{ job.id }}">{{ job.mlmodel__title }}</label>
+        <label class="form-check-label" for="job-{{ job.id }}">{{ job.id}} - {{ job.mlmodel__title }}</label>
     </div> 
 {% empty %}
-No models have been tested with this benchmark
+<p>No models have been tested with this benchmark</p>
 {% endfor %}
 {% endblock %}
 
@@ -22,12 +18,16 @@ No models have been tested with this benchmark
     <div class="row align-items-start">
         <canvas id="chart" width="400" height="400"></canvas>
     </div>
+    <button type="button" class="btn btn-primary" id="chartToClipboard">Copy Chart to Clipboard</button>
+    <button type="button" class="btn btn-primary" id="dataToLatex">Copy Data as LaTeX</button>
     <div class="row align-items-start" id="modeltable">
     </div>
 {% endblock %}
 
 {% block mainscript %}
 <script>
-    const gl_jobsWithBenchmarkStr = '{{ jobs_with_benchmark_str }}';
+    const gl_jobsWithBenchmarkStr = '{{ jobs_with_benchmark_str | safe }}';
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.3.2/chart.min.js"></script>
+<script src="{% static 'benchmark_graph.js' %}"></script>
 {% endblock %}

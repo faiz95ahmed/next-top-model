@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 from pathlib import Path
 import json
 import redis
-from .util import check_redis
+from .util import check_redis, read_schedule
 
 with open('config.json', 'r') as f:
     config_dict = json.load(f)
@@ -21,6 +21,7 @@ REDIS_PORT = check_redis()
 _redis = redis.Redis(host = 'localhost', port = REDIS_PORT, db = 0)
 GPUS = config_dict['gpus']
 
+schedule = read_schedule(config_dict['schedule'])
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

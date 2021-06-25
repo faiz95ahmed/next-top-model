@@ -20,7 +20,7 @@ def to_str_safe(d):
             ls = ls + [92, 117, 48, 48, 50, 55]
         else:
             ls.append(c)
-    return "--json_args" + bytes(ls).decode()
+    return "--json_args '" + bytes(ls).decode() + "'"
 
 # Create your models here.
 class Job(models.Model):

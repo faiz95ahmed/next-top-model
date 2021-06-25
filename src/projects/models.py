@@ -12,6 +12,7 @@ class Project(models.Model):
     parent      = models.ForeignKey('self', on_delete=CASCADE, null=True, blank=True)
 
     def get_absolute_url(self):
+        print(self.title)
         return reverse("projects:project-detail", kwargs={"id": self.id})
 
     def get_delete_url(self):
@@ -57,7 +58,7 @@ class MLModel(models.Model):
     description  = models.TextField()
     auth_users   = models.ManyToManyField(User, blank=False) # need to add permissions - read (list/detail & create jobs), create (to create subprojects or mlmodels), update&delete (to update&delete)
     parent       = models.ForeignKey(Project, on_delete=CASCADE, null=False, blank=False)
-    model_args   = models.JSONField(blank=True, verbose_name="Model Specific Arguments (e.g. Hyperparameters)")
+    model_args   = models.JSONField(default=dict, verbose_name="Model Specific Arguments (e.g. Hyperparameters)")
 
     def get_absolute_url(self):
         return reverse("projects:mlmodel-detail", kwargs={"id": self.id})

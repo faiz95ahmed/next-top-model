@@ -59,6 +59,9 @@ class Activity(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return self.title
 
 
 class Protocol(Activity):
@@ -71,6 +74,9 @@ class Protocol(Activity):
 
     def get_delete_url(self):
         return reverse("activities:protocol-delete", kwargs={"id": self.id})
+    
+    def __str__(self):
+        return "Training Protocol: {}".format(super().__str__())
 
 
 class Benchmark(Activity):
@@ -84,3 +90,5 @@ class Benchmark(Activity):
     def get_delete_url(self):
         return reverse("activities:benchmark-delete", kwargs={"id": self.id})
 
+    def __str__(self):
+        return "Benchmark: {}".format(super().__str__())

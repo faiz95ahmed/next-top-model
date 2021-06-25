@@ -29,7 +29,6 @@ incremental==21.3.0
 kombu==5.1.0
 msgpack==1.0.2
 prompt-toolkit==3.0.18
-psutil==5.8.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycparser==2.20

@@ -11,12 +11,8 @@ python3 manage.py runserver
 
 ## TODO:
 * GPU usage monitoring
-* Job Scheduling
-* Auto Stopping and restarting around schedules
-* Benchmarks, Visualisations, Tables:
-    * Export table as LaTeX?
-    * Auto generate Table and Figure captions?
-    * Export as LaTeX float?
+* Job Scheduling (DONE ?)
+* Auto Stopping and restarting around schedules (DONE ?)
 
 Not really relevant to my project, but could be useful to pick up after I submit my project:
 * Compartmentalise Projects and MLModels better

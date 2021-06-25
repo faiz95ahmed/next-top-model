@@ -13,11 +13,10 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-import atexit
-from next_top_model.util import check_celery, kill_celery
+# import atexit
+# from next_top_model.util import check_celery, kill_celery, CELERY_PIDS
 from django.contrib import admin
 from django.urls import include, path
-from .settings import GPUS
 from pages.views import home_view
 
 urlpatterns = [
@@ -30,11 +29,3 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls'))
 ]
 
-# one time startup
-
-celery_beat_pid, celery_default_worker_pid, celery_job_worker_pid = check_celery(GPUS)
-if celery_beat_pid is not None and celery_default_worker_pid is not None and celery_job_worker_pid is not None:
-    @atexit.register
-    def end_celery():
-        pass
-        kill_celery(celery_beat_pid, celery_default_worker_pid, celery_job_worker_pid)

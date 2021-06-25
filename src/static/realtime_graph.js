@@ -99,7 +99,11 @@ const job_to_box = new Map(); // int -> int
 const box_to_job = new Map(); // int -> int (these two need to be edited in parallel!)
 const boxMap = new Map(); // map of box_id (int) -> (title slot, chart context, chart, progress bar, controls, log box, style)
 var box_count = 0;
-var head = null;
+var heads = document.getElementsByTagName('head');
+while (heads.length == 0) heads = document.getElementsByTagName('head');
+var head = heads[0];
+var gridElem = document.getElementById('graphGrid');
+while (gridElem === null) gridElem = document.getElementById('graphGrid');
 
 // methods
 function freshjobMap() {
@@ -127,6 +131,7 @@ function newStyle(boxNum, logLevel) {
 function updateStyleTag(boxNum, logLevel) {
     const new_style_map = newStyle(boxNum, logLevel);
     const style_string = Array.from(new_style_map.values()).join("\n");
+    const logboxElement = boxMap.get(boxNum).logbox.logboxElement;
     var style_section = document.getElementById('loglevelstyle-'.concat(boxNum.toString()));
     if (style_section === null) {
         style_section = document.createElement('style');
@@ -134,6 +139,7 @@ function updateStyleTag(boxNum, logLevel) {
         head.appendChild(style_section);
     }
     style_section.innerText = style_string;
+    logboxElement.scrollTop = logboxElement.scrollHeight;
 }
 
 function updateStyleOptionsTag(boxNum) {
@@ -143,7 +149,7 @@ function updateStyleOptionsTag(boxNum) {
     var style_section = document.getElementById('logoptionsstyle-'.concat(boxNum.toString()));
     if (style_section === null) {
         style_section = document.createElement('style');
-        style_section.id = "loglevelstyle-".concat(boxNum.toString());
+        style_section.id = "logoptionsstyle-".concat(boxNum.toString());
         head.appendChild(style_section);
     }
     style_section.innerText = style_string;
@@ -246,8 +252,8 @@ function constructBox(boxNum) {
         bar: div.getElementsByClassName('progress-bar')[0],
         abortButton: div.getElementsByClassName('abortbutton')[0],
     };
-    console.log(boxData.bar);
-    console.log(boxData.abortButton);
+    // console.log(boxData.bar);
+    // console.log(boxData.abortButton);
     boxMap.set(boxNum, boxData);
     // reconstructBox(boxNum);
     return div;
@@ -322,25 +328,14 @@ function reconstructBox(boxNum) {
         loglevelButtons: loglevelButtons
     };
     
-    updateStyleTag(boxNum, 20);
+    
     old_boxdata.abortButton.setAttribute("class", "abortbutton btn btn-danger");
     old_boxdata.abortButton.disabled = false;
     old_boxdata.abortButton.innerHTML = "Abort";
     const job_id = box_to_job.get(boxNum);
     old_boxdata.abortButton.addEventListener("click", function() {
         if (confirm('Are you sure you want to abort job ' + job_id + "?")) {
-            $.ajax(
-            {
-                type:"GET",
-                url: "{% url 'graph:graph-abort' %}",
-                data:{
-                    job_id: job_id
-                },
-                success: function( data ) 
-                {
-                    disableButton(abortButton)
-                }
-            })
+            socket.send(JSON.stringify({type:"abort", args:{job_id:job_id}}));
         } else {
             return false;
         }
@@ -358,6 +353,7 @@ function reconstructBox(boxNum) {
     };
     boxMap.set(boxNum, new_box_data);
     updateStyleOptionsTag(boxNum);
+    updateStyleTag(boxNum, 20);
 }
 
 function constructRow(rowNum, numBoxesInRow) {
@@ -365,6 +361,7 @@ function constructRow(rowNum, numBoxesInRow) {
     div.className = "row align-items-start";
     div.id = "row-".concat(rowNum.toString());
     var boxes = [constructBox(2 * rowNum)];
+    // console.log(numBoxesInRow);
     if (numBoxesInRow > 1) {
         boxes.push(constructBox((2 * rowNum) + 1));
     }
@@ -375,27 +372,26 @@ function constructRow(rowNum, numBoxesInRow) {
 }
 
 function resizeGrid(numBoxes) {
-    var gridElem = document.getElementById('graphGrid');
     var rows = gridElem.children;
     const num_rows = (numBoxes + 1) >> 1;
-    console.log(num_rows.toString() + " " + rows.length.toString());
+    // console.log(num_rows.toString() + " " + rows.length.toString());
     if (rows.length > num_rows) {
         for (const i of range(num_rows, rows.length)) {
             gridElem.removeChild(rows.item(i));
         }
     }
     else if (rows.length < num_rows) {
-        console.log("HELLO");
-        console.log(range(rows.length, num_rows, 1));
+        // console.log("HELLO");
+        // console.log(range(rows.length, num_rows, 1));
         for (const i of range(rows.length, num_rows, 1)) {
             var new_row;
             if (i == (num_rows - 1)) {
-                new_row = constructRow(i, numBoxes % 2);
+                new_row = constructRow(i, (numBoxes % 2 == 0) ? 2 : 1); // more understandable than 1 + ((numBoxes + 1) % 2)
             } else {
                 new_row = constructRow(i, 2);
             }
             gridElem.appendChild(new_row);
-            console.log("appended");
+            // console.log("appended");
         }
     } else if (rows.length > 0) {
         // correct number of rows. Check if last row has right number of columns
@@ -417,31 +413,50 @@ function updateJob(jobId, newData) {
     // change button to reflect the abort acknowledged
     if (newData.abort_ack) abortAcknowledged(boxData.abortButton);
     if (boxData.header.innerText=="") {
-        boxData.header.innerText = newData.model_name;
+        boxData.header.innerText = newData.is_bench ? "TEST: " : "TRAIN: ";
+        boxData.header.innerText += newData.model_name;
     }
-    console.log(Object.keys(newData.progress));
+    // console.log(Object.keys(newData.progress));
     const max_epoch = Math.max(...Array.from(Object.keys(newData.progress)).map(x => parseInt(x)));
     if (max_epoch >= 0) {
+        // console.log(newData.logs);
         updateLogs(boxNum, newData.logs);
         updateDatasets(boxData.chart, jobId, newData.progress, max_epoch);
-        console.log(boxNum, newData.progress[max_epoch], max_epoch);
+        // console.log(boxNum, newData.progress[max_epoch], max_epoch);
         updateProgress(boxNum, newData.progress[max_epoch], max_epoch);
     }
 }
 
 socket.onmessage = function(e) {
-    console.log(e);
-    var eventData = JSON.parse(e.data).all_data;
-    var active_jobs = Array.from(Object.keys(eventData)).map(x => parseInt(x));
-    var r = rejigBoxes(active_jobs);
-    var boxes_to_load = r.boxes_to_load;
-    resizeGrid(active_jobs.length);
-    for (const i of boxes_to_load) {
-        reconstructBox(i);
+    // console.log(e);
+    var event = JSON.parse(e.data);
+    if (event.type == "consumer_response") {
+        var response = event.response;
+        if (response.type == "consumer_received_abort") {
+            const response_data = response.data;
+            const job_id = parseInt(response_data.job_id);
+            const box_id = job_to_box.get(job_id);
+            const abortButton = boxMap.get(box_id).abortButton;
+            disableAbortButton(abortButton);
+        } else {
+            console.log("unrecognised consumer response!");
+        }
+    } else if (event.type == "job_data") {
+        var eventData = JSON.parse(event.all_data);
+        var active_jobs = Array.from(Object.keys(eventData)).map(x => parseInt(x));
+        var r = rejigBoxes(active_jobs);
+        var boxes_to_load = r.boxes_to_load;
+        resizeGrid(active_jobs.length);
+        for (const i of boxes_to_load) {
+            reconstructBox(i);
+        }
+        for (const job_id of active_jobs) {
+            updateJob(job_id, eventData[job_id.toString()]);
+        }
+    } else {
+        console.log("unrecognised consumer response!");
     }
-    for (const job_id of active_jobs) {
-        updateJob(job_id, eventData[job_id.toString()]);
-    }
+
 }
 
 function logObjectToP(logObject, boxNum) {
@@ -449,8 +464,8 @@ function logObjectToP(logObject, boxNum) {
     timeElem.className = "logTime".concat(boxNum.toString())
     timeElem.innerText = logObject.time + " ";
     var orderElem = document.createElement(null);
-    orderElem.innerText = logObject.order + " ";
-    timeElem.className = "logOrder".concat(boxNum.toString())
+    orderElem.innerText = logObject.relativeCreated + " ";
+    orderElem.className = "logOrder".concat(boxNum.toString())
     var message = logObject.message;
     var p = document.createElement("p");
     var loglevelstr = loglevel_to_name.get(logObject.log_level);
@@ -464,6 +479,7 @@ function logObjectToP(logObject, boxNum) {
 }
 
 function updateLogs(boxNum, newLogs) {
+    //console.log("new Logs " +newLogs.length.toString());
     var logboxElement = boxMap.get(boxNum).logbox.logboxElement;
     for (const logObject of newLogs) {
         logboxElement.appendChild(logObjectToP(logObject, boxNum));
@@ -490,7 +506,7 @@ function updateDatasets(chart, job_id, newData, maxEpoch) {
     for (const epoch of Object.keys(newData)) {
         for (const series_name of Object.keys(newData[epoch])) {
             if (!current_dataset.has(series_name)) {
-                console.log(maxEpoch);
+                // console.log(maxEpoch);
                 const new_series_data = Array(maxEpoch + 1).fill(null);
                 // construct new dataset item and add it to the chart
                 // TODO: This only supports 3 series! NOT GOOD!
@@ -521,8 +537,8 @@ function updateDatasets(chart, job_id, newData, maxEpoch) {
 function updateProgress(boxNum, progress, epoch) {
     const progressBarElement = boxMap.get(boxNum).bar
     // TODO: Simply selecting the first series is a really bad idea and needs to be improved upon
-    console.log(boxNum, progress);
-    //console.log(progress);
+    // console.log(boxNum, progress);
+    //// console.log(progress);
     const series = progress[Object.keys(progress)[0]];
     const series_progess = Math.round(series.progress * 100);
     setProgress(progressBarElement, series_progess, "Epoch " + epoch + ": "+ series_progess + "%");
@@ -551,6 +567,7 @@ function interpolate(arr, initial_val) {
     }
 }
 
-window.addEventListener("load", function(){
-    head = document.getElementsByTagName('head')[0];
-});
+// window.addEventListener("load", function(){
+//     head = document.getElementsByTagName('head')[0];
+//     gridElem = document.getElementById('graphGrid');
+// });

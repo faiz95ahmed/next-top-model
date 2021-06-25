@@ -1,4 +1,15 @@
 {
     "django_key_path": "/home/faiz/Desktop/djangokey",
-    "gpus": [0]
+    "gpus": [0, 1],
+    "schedule": [{
+            "start": {
+                "hour": 6
+            },
+            "end": {
+                "hour": 11,
+                "minute": 10
+            },
+            "type": "NOT"
+    }
+]
 }

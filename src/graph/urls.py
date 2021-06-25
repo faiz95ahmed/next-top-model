@@ -14,11 +14,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
-from .views import index, abort
-# from .views import JobDeleteView, JobListView, JobDetailView
+from .views import index
 
 app_name = 'graph'
 urlpatterns = [
     path ('', index, name='graph-index'),
-    path ('abort', abort, name='graph-abort')
 ]
