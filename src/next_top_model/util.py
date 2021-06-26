@@ -9,7 +9,6 @@ from django.apps import apps
 from jobs.util import JobStatus
 from datetime import time, datetime
 
-CELERY_PIDS = {}
 SCHEDULE = None
 
 def check_redis():
@@ -80,8 +79,8 @@ def end_process(name, pid, original_timeout=5):
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     signal.signal(signal.SIGTERM, signal.SIG_DFL)
 
-def kill_celery():
-    celery_processes = [(k.replace("_", " ").upper(), v) for k, v in CELERY_PIDS.items()]
+def kill_celery(celery_pids):
+    celery_processes = [(k.replace("_", " ").upper(), v) for k, v in celery_pids.items()]
     for subprocess_name, subprocess_pid in celery_processes:
         end_process(subprocess_name, subprocess_pid)
 
@@ -97,7 +96,11 @@ def start_celery(num_gpus):
     p_beat = psutil.Popen(["celery", "-A", "next_top_model", "beat", "-l", "INFO", "-f", "celery_beat.log"], stdout=DEVNULL)
     p_job_monitor = psutil.Popen(["celery", "-A", "next_top_model", "worker", "-n", "job_monitor", "-Q", "monitor", "-l", "INFO", "-f", "celery_monitor_worker.log"], stdout=DEVNULL)
     p_default_worker = psutil.Popen(["celery", "-A", "next_top_model", "worker", "-n", "default_worker", "-c", str(num_gpus), "-Q", "default", "-l", "INFO", "-f", "celery_default_worker.log"], stdout=DEVNULL)
-    return p_beat.pid, p_default_worker.pid, p_job_monitor.pid
+    return {
+            "celery_beat_pid": p_beat.pid,
+            "celery_default_worker_pid": p_default_worker.pid,
+            "celery_job_monitor_pid": p_job_monitor.pid
+            }
 
 def check_celery(num_gpus):
     print("STARTING CELERY!")
