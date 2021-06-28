@@ -9,10 +9,12 @@ from .util import least_utilised_gpu, SCHEDULE
 
 import shlex
 import subprocess
+import GPUtil   
 import logging
 from jobs.util import JobStatus
 import json
-
+from threading import Thread
+import time
 
 logger = get_task_logger(__name__)
 logging.basicConfig(
@@ -50,6 +52,30 @@ app.conf.beat_schedule = {
     }
 }
 
+
+class Monitor(Thread):
+    def __init__(self, delay, gpu_id):
+        super(Monitor, self).__init__()
+        self.stopped = False
+        self.delay = delay # Time between calls to GPUtil
+        self.start()
+        try:
+            self.gpu = [g for g in GPUtil.getGPUs() if g.id==gpu_id][0]
+        except IndexError:
+            print("This GPU does not exist! ({})".format(gpu_id))
+            self.stopped = True
+        self.total_usage = 0
+
+    def run(self):
+        while not self.stopped:
+            self.total_usage += self.gpu.load * self.delay
+            time.sleep(self.delay)
+
+    def stop(self):
+        self.stopped = True
+        
+
+
 # @shared_task(name='do_job')
 def do_job(job_id: int):
     Job = apps.get_model('jobs', 'Job')
@@ -66,9 +92,12 @@ def do_job(job_id: int):
         # clean job data
         command = curr_job.get_command()
         logger.log(logging.INFO, command)
+        # Instantiate monitor with a 1-second delay between updates
+        monitor = Monitor(1)
         # enact command (blocking)
         _ = subprocess.run(shlex.split(command)) # we should really capture and store the pids
                                                  # and run the command in a screen, then detach the screen?
+        monitor.stop()
         curr_job = Job.objects.get(id=job_id) # reload job from DB
         if (curr_job.status == JobStatus.RUNNING):
             # this job was manually aborted
@@ -81,6 +110,7 @@ def do_job(job_id: int):
             Result = apps.get_model('jobs', 'Result')
             _, x = _redis.blpop(job_name+ "_result")
             result_dict = json.loads(x)
+            result_dict.update({"gpu_usage": monitor.total_usage})
             res_obj = Result(job=curr_job, epoch=None, content=result_dict)
             res_obj.save()
 
