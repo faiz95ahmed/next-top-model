@@ -3,7 +3,7 @@
 import atexit
 import os
 import sys
-from next_top_model.util import start_celery, kill_all_celery, kill_celery, CELERY_PIDS
+from next_top_model.util import start_celery, kill_all_celery, kill_celery
 import json
 
 def main():
@@ -23,8 +23,8 @@ def main():
         kill_all_celery()
         with open("config.json", "r") as f:
             num_gpus = len(json.loads(f.read())["gpus"])
-        CELERY_PIDS["celery_beat_pid"], CELERY_PIDS["celery_default_worker_pid"], CELERY_PIDS["celery_job_monitor_pid"] = start_celery(num_gpus)
-        atexit.register(kill_celery)
+        celery_pids = start_celery(num_gpus)
+        atexit.register(kill_celery, celery_pids)
     execute_from_command_line(args)
 
 if __name__ == '__main__':
